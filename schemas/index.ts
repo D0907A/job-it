@@ -2,6 +2,25 @@ import * as z from "zod";
 import {UserRole} from "@prisma/client";
 import {date} from "zod";
 
+type CompanyFormData = z.infer<typeof CompanySchema>;
+
+interface Company {
+    id: string;
+    name: string;
+    description: string | null;
+    ownerId: string;
+}
+
+interface CompanyFormProps {
+    company?: Company;
+}
+
+export const CompanySchema = z.object({
+    id: z.string().optional(),
+    name: z.string(),
+    description: z.string().optional(),
+});
+
 export const SettingsSchema = z.object({
     name: z.string().optional(),
     isTwoFactorEnabled: z.boolean().optional(),

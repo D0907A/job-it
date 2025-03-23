@@ -20,6 +20,7 @@ import {FormSuccess} from "@/components/ui/form-success";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {UserRole} from "@prisma/client";
 import {Switch} from "@/components/ui/switch";
+import {createCompany, getUserCompany} from "@/actions/company";
 
 const SettingsPage = () => {
     const user = useCurrentUser();
@@ -45,7 +46,6 @@ const SettingsPage = () => {
     })
     const onSubmit = (values: z.infer<typeof SettingsSchema>) => {
         startTransition(() => {
-            console.log(values)
             settings(values)
                 .then((data) => { // <-- Capture the response
                     if (data?.error) {
@@ -61,6 +61,11 @@ const SettingsPage = () => {
                 .catch(() => setError("Something went wrong"));
         });
     };
+
+    const buttonClick = () => {
+        createCompany();
+        getUserCompany()
+    }
 
     return (
         <Card className="w-[600px]">
@@ -206,6 +211,7 @@ const SettingsPage = () => {
                         </div>
                     </form>
                 </Form>
+                <Button onClick={buttonClick}>Save company</Button>
             </CardContent>
         </Card>
     );

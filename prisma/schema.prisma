@@ -26,6 +26,9 @@ model User {
   accounts              Account[]
   isTwoFactorEnabled    Boolean                @default(false)
   twoFactorConfirmation TwoFactorConfirmation?
+
+  companies    Company[]
+  jobVacancies JobVacancy[]
 }
 
 model Account {
@@ -82,4 +85,27 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  jobs        JobVacancy[]
+
+  // @@map("companies")
+}
+
+model JobVacancy {
+  id          String  @id @default(cuid())
+  title       String
+  description String
+  authorId    String
+  author      User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  companyId   String
+  company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // @@map("jobVacancies")
 }

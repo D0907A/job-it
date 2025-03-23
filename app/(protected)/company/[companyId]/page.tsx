@@ -14,19 +14,19 @@ const CompanyPage = async ({params}: CompanyPageProps) => {
     const user = await currentUser();
     if (!user) return notFound();
 
-    const fetchedParams = await params;
+    const {companyId} = await params;
 
 
     //todo: fix types error using interface
-    if (params.companyId=="new"){
+    if (companyId=="new"){
         return (
             <CompanyForm company={{id:"new"}}/>
         )
     }else{
-        const isOwner = await checkOwnerOfTheCompany(fetchedParams.companyId, user.id);
+        const isOwner = await checkOwnerOfTheCompany(companyId, user.id);
         if (!isOwner) return redirect("/forbidden");
 
-        const company = await getCompanyById(fetchedParams.companyId);
+        const company = await getCompanyById(companyId);
 
 
         return (

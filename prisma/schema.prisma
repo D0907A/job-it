@@ -94,8 +94,6 @@ model Company {
   ownerId     String
   owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   jobs        JobVacancy[]
-
-  // @@map("companies")
 }
 
 model JobVacancy {
@@ -107,5 +105,57 @@ model JobVacancy {
   companyId   String
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  // @@map("jobVacancies")
+  jobType         JobType
+  employmentType  EmploymentType
+  workingType     WorkingType
+  paymentFrom     Float
+  paymentTo       Float
+  jobSkills       JobSkill[]
+  location        String?
+  experienceLevel ExperienceLevel?
+  publishedAt     DateTime         @default(now())
+  validUntil      DateTime
+  isActive        Boolean          @default(true)
+}
+
+enum JobType {
+  DEVELOPER
+  TESTER
+  DESIGNER
+  MANAGER
+}
+
+enum EmploymentType {
+  CONTRACT_OF_WORK
+  B2B
+  CONTRACT_OF_MANDATE
+}
+
+enum WorkingType {
+  REMOTE
+  OFFICE
+  HYBRID
+}
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+enum Skill {
+  JAVASCRIPT
+  TYPESCRIPT
+  JAVA
+  PYTHON
+  GIT
+  REACT
+  NODE
+}
+
+model JobSkill {
+  id    String     @id @default(cuid())
+  job   JobVacancy @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String
+  skill Skill
 }

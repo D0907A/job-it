@@ -1,6 +1,27 @@
 import * as z from "zod";
-import {UserRole} from "@prisma/client";
+import {UserRole, JobType, JobSkill, EmploymentType, WorkingType} from "@prisma/client";
 import {date} from "zod";
+
+
+export const JobSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+
+    companyId: z.string().min(1, "Company is required"),
+
+    jobType: z.nativeEnum(JobType),
+    employmentType: z.nativeEnum(EmploymentType),
+    workingType: z.nativeEnum(WorkingType),
+
+    paymentFrom: z.coerce.number().min(0, "Must be a number"),
+    paymentTo: z.coerce.number().min(0, "Must be a number"),
+
+    validUntil: z.coerce.date({
+        errorMap: () => ({ message: "Valid until date is required" }),
+    }),
+
+    skills: z.string().optional(),
+});
 
 type CompanyFormData = z.infer<typeof CompanySchema>;
 

@@ -55,7 +55,7 @@ export const SettingsSchema = z.object({
     }
     return true;
 }, {
-    message: "Both password and new password are required together.",
+    message: "Both password and _new password are required together.",
     path: ["newPassword"],
 });
 

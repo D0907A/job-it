@@ -99,7 +99,7 @@ export const deleteCompany = async (companyId: string) => {
     const user = await currentUser();
 
     //just for testing
-    //await new Promise((resolve) => setTimeout(resolve, 2000));
+    //await _new Promise((resolve) => setTimeout(resolve, 2000));
 
     await db.company.delete({
         where:{

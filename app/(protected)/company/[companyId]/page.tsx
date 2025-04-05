@@ -1,40 +1,41 @@
-"use server"
+'use server'
 
-import {checkOwnerOfTheCompany, getCompanyById} from "@/actions/company";
-import {currentUser} from "@/lib/auth";
-import {redirect, notFound} from "next/navigation";
-import CompanyForm from "@/components/company-settings";
-import {Company} from ".prisma/client";
+import { checkOwnerOfTheCompany, getCompanyById } from '@/actions/company'
+import { currentUser } from '@/lib/auth'
+import { redirect, notFound } from 'next/navigation'
+import CompanyForm from '@/components/company-settings'
+import { Company } from '.prisma/client'
+import CardLayout from '../../_components/admin-card-layout'
 
 interface CompanyPageProps {
-    params: { companyId: string };
+    params: { companyId: string }
 }
 
-const CompanyPage = async ({params}: CompanyPageProps) => {
-    const user = await currentUser();
-    if (!user) return notFound();
+const CompanyPage = async ({ params }: CompanyPageProps) => {
+    const user = await currentUser()
+    if (!user) return notFound()
 
-    const {companyId} = await params;
+    const { companyId } = params
 
-
-    //todo: fix types error using interface
-    if (companyId=="new"){
+    if (companyId === 'new') {
         return (
-            <CompanyForm company={{id:"new"}}/>
-        )
-    }else{
-        const isOwner = await checkOwnerOfTheCompany(companyId, user.id);
-        if (!isOwner) return redirect("/forbidden");
-
-        const company = await getCompanyById(companyId);
-
-
-        return (
-            <CompanyForm company={company}/>
+            <CardLayout title="Create New Company" backUrl="/dashboard">
+                <CompanyForm company={{ id: 'new' } as Partial<Company>} />
+            </CardLayout>
         )
     }
-};
 
-export default CompanyPage;
+    const isOwner = await checkOwnerOfTheCompany(companyId, user.id)
+    if (!isOwner) return redirect('/forbidden')
 
+    const company = await getCompanyById(companyId)
+    if (!company) return notFound()
 
+    return (
+        <CardLayout title="Edit Company" backUrl="/dashboard">
+            <CompanyForm company={company} />
+        </CardLayout>
+    )
+}
+
+export default CompanyPage

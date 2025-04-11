@@ -3,6 +3,7 @@
 import {currentUser} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {CompanySchema} from "@/schemas";
+import {z} from "zod";
 
 export const createCompany = async (company) => {
     const user = await currentUser();

@@ -1,5 +1,5 @@
 import * as z from "zod";
-import {UserRole, JobType, JobSkill, EmploymentType, WorkingType} from "@prisma/client";
+import {UserRole, JobType, JobSkill, EmploymentType, WorkingType, ExperienceLevel} from "@prisma/client";
 import {date} from "zod";
 
 
@@ -10,6 +10,7 @@ export const JobSchema = z.object({
     companyId: z.string().min(1, "Company is required"),
 
     jobType: z.nativeEnum(JobType),
+    experienceLevel: z.nativeEnum(ExperienceLevel).optional(),
     employmentType: z.nativeEnum(EmploymentType),
     workingType: z.nativeEnum(WorkingType),
 

@@ -53,7 +53,7 @@ export default function JobsList({ jobs }: { jobs: any[] }) {
                         {/* Title & Status */}
                         <div className="flex justify-between items-start flex-wrap gap-2">
                             <div className="flex items-center gap-3">
-                                <Link href={`/jobs/${job.id}`}>
+                                <Link href={`jobs/${job.id}`}>
                                     <h3 className="text-lg font-semibold text-foreground hover:underline hover:text-primary transition-colors">
                                         {job.title}
                                     </h3>

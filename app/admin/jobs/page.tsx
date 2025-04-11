@@ -1,5 +1,5 @@
 import {getJobsByUserId} from "@/actions/jobs";
-import JobsList from "@/app/(protected)/_components/jobsList";
+import JobsList from "@/app/admin/_components/jobsList";
 
 const JobsAdminPage = async () => {
     const jobs = await getJobsByUserId()

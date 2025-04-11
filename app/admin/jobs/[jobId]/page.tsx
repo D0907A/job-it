@@ -1,5 +1,5 @@
 import { getJobById } from '@/actions/jobs'
-import JobForm from '@/app/(protected)/_components/job-form'
+import JobForm from '@/app/admin/_components/job-form'
 import CardLayout from '../../_components/admin-card-layout'
 import { notFound } from 'next/navigation'
 
@@ -12,7 +12,7 @@ export default async function JobPage({ params }: JobPageProps) {
 
     if (jobId === 'new') {
         return (
-            <CardLayout title="Create Job" backUrl="/jobs">
+            <CardLayout title="Create Job" backUrl="/admin/jobs">
                 <JobForm job={null} />
             </CardLayout>
         )
@@ -22,7 +22,7 @@ export default async function JobPage({ params }: JobPageProps) {
     if (!job) return notFound()
 
     return (
-        <CardLayout title="Edit Job" backUrl="/jobs">
+        <CardLayout title="Edit Job" backUrl="/admin/jobs">
             <JobForm job={job} />
         </CardLayout>
     )

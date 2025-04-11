@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import Link from "next/link";
-import CompanyList from "@/app/(protected)/_components/companyList";
+import CompanyList from "@/app/admin/_components/companyList";
 
 const CompanyPage = async () => {
     const user = await currentUser();

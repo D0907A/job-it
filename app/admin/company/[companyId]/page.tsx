@@ -19,7 +19,7 @@ const CompanyPage = async ({ params }: CompanyPageProps) => {
 
     if (companyId === 'new') {
         return (
-            <CardLayout title="Create New Company" backUrl="/dashboard">
+            <CardLayout title="Create New Company" backUrl="/admin/company">
                 <CompanyForm company={{ id: 'new' } as Partial<Company>} />
             </CardLayout>
         )
@@ -32,7 +32,7 @@ const CompanyPage = async ({ params }: CompanyPageProps) => {
     if (!company) return notFound()
 
     return (
-        <CardLayout title="Edit Company" backUrl="/dashboard">
+        <CardLayout title="Edit Company" backUrl="/admin/company">
             <CompanyForm company={company} />
         </CardLayout>
     )

@@ -15,6 +15,48 @@ enum UserRole {
   USER
 }
 
+enum JobType {
+  DEVELOPER
+  TESTER
+  DESIGNER
+  MANAGER
+}
+
+enum JobLevel {
+  TRAINEE
+  JUNIOR
+  MID
+  SENIOR
+}
+
+enum EmploymentType {
+  CONTRACT_OF_WORK
+  B2B
+  CONTRACT_OF_MANDATE
+}
+
+enum WorkingType {
+  REMOTE
+  OFFICE
+  HYBRID
+}
+
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
+enum Skill {
+  JAVASCRIPT
+  TYPESCRIPT
+  JAVA
+  PYTHON
+  GIT
+  REACT
+  NODE
+}
+
 model User {
   id                    String                 @id @default(cuid())
   name                  String?
@@ -106,6 +148,8 @@ model JobVacancy {
   company     Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   jobType         JobType
+  jobLevel        JobLevel?
+  experience      Int?
   employmentType  EmploymentType
   workingType     WorkingType
   paymentFrom     Float
@@ -116,41 +160,19 @@ model JobVacancy {
   publishedAt     DateTime         @default(now())
   validUntil      DateTime
   isActive        Boolean          @default(true)
+  jobApplications JobApplication[]
 }
 
-enum JobType {
-  DEVELOPER
-  TESTER
-  DESIGNER
-  MANAGER
-}
-
-enum EmploymentType {
-  CONTRACT_OF_WORK
-  B2B
-  CONTRACT_OF_MANDATE
-}
-
-enum WorkingType {
-  REMOTE
-  OFFICE
-  HYBRID
-}
-
-enum ExperienceLevel {
-  JUNIOR
-  MID
-  SENIOR
-}
-
-enum Skill {
-  JAVASCRIPT
-  TYPESCRIPT
-  JAVA
-  PYTHON
-  GIT
-  REACT
-  NODE
+model JobApplication {
+  id            String     @id @default(cuid())
+  jobVacancyId  String
+  jobVacancy    JobVacancy @relation(fields: [jobVacancyId], references: [id], onDelete: Cascade)
+  applicantName String
+  email         String
+  phone         String?
+  coverLetter   String
+  resumeUrl     String?
+  createdAt     DateTime   @default(now())
 }
 
 model JobSkill {

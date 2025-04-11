@@ -2,77 +2,98 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+    Form, FormControl, FormField, FormItem,
+    FormLabel, FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {Switch} from "@/components/ui/switch";
+import { Switch } from "@/components/ui/switch";
 import { FormSuccess } from "@/components/ui/form-success";
 import { FormError } from "@/components/form-error";
 
-import { JobSchema } from "@/schemas";
+import { JobSchema, type JobFormData } from "@/schemas";
 import { createJob, updateJob } from "@/actions/jobs";
 import { getUserCompany } from "@/actions/company";
+import {ExperienceLevel} from "@prisma/client";
 
-import type { z } from "zod";
-import type { JobFormData } from "@/schemas";
+interface Job {
+    id: string;
+    title: string;
+    description: string;
+    jobType?: string;
+    experience?: number;
+    experienceLevel?: ExperienceLevel;
+    jobLevel?: string;
+    employmentType?: string;
+    workingType?: string;
+    paymentFrom?: number;
+    paymentTo?: number;
+    validUntil?: string;
+    jobSkills?: { skill: string }[];
+    companyId?: string;
+    isActive?: boolean;
+}
 
 interface JobFormProps {
-    job?: any; // consider replacing 'any' with an actual Job type
+    job?: Job;
 }
 
 export default function JobForm({ job }: JobFormProps) {
-    const form = useForm<z.infer<typeof JobSchema>>({
+    const form = useForm<JobFormData>({
         resolver: zodResolver(JobSchema),
         defaultValues: {
             title: job?.title || "",
             description: job?.description || "",
-            jobType: job?.jobType || undefined,
-            employmentType: job?.employmentType || undefined,
-            workingType: job?.workingType || undefined,
-            paymentFrom: job?.paymentFrom || 0,
-            paymentTo: job?.paymentTo || 0,
+            jobType: job?.jobType || "",
+            experience: job?.experience ?? undefined,
+            jobLevel: job?.jobLevel || "",
+            experienceLevel: job?.experienceLevel || "",
+            employmentType: job?.employmentType || "",
+            workingType: job?.workingType || "",
+            paymentFrom: job?.paymentFrom ?? 0,
+            paymentTo: job?.paymentTo ?? 0,
             validUntil: job?.validUntil ? new Date(job.validUntil).toISOString().slice(0, 10) : "",
-            skills: job?.jobSkills?.map((s: any) => s.skill).join(", ") || "",
+            skills: job?.jobSkills?.map((s) => s.skill).join(", ") || "",
             companyId: job?.companyId || "",
             isActive: job?.isActive ?? true,
         },
     });
 
-    const [companies, setCompanies] = useState<any[]>([]);
+    const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
     const [error, setError] = useState<string>();
     const [success, setSuccess] = useState<string>();
     const [isPending, startTransition] = useTransition();
     const router = useRouter();
 
     useEffect(() => {
-        async function fetchCompanies() {
+        const fetchCompanies = async () => {
             const companiesList = await getUserCompany();
             setCompanies(companiesList);
-        }
+        };
         fetchCompanies();
     }, []);
 
-    const onSubmit = (data: z.infer<typeof JobSchema>) => {
+    const onSubmit = (data: JobFormData) => {
         startTransition(async () => {
             setError(undefined);
             setSuccess(undefined);
 
+
             try {
                 const formData = new FormData();
                 Object.entries(data).forEach(([key, value]) => {
-                    formData.append(key, value as string);
+                    if (typeof value === "boolean") {
+                        formData.append(key, value ? "true" : "false");
+                    } else {
+                        formData.append(key, String(value));
+                    }
                 });
 
                 if (job?.id) {
@@ -88,6 +109,37 @@ export default function JobForm({ job }: JobFormProps) {
             }
         });
     };
+
+    const SelectField = ({
+                             name,
+                             label,
+                             options,
+                         }: {
+        name: keyof JobFormData;
+        label: string;
+        options: { label: string; value: string }[];
+    }) => (
+        <FormField
+            control={form.control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                        <select {...field} className="w-full p-2 border rounded" disabled={isPending}>
+                            <option value="">Select {label.toLowerCase()}</option>
+                            {options.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </option>
+                            ))}
+                        </select>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    );
 
     return (
         <Card className="w-full max-w-3xl mx-auto shadow-md flex flex-col">
@@ -117,13 +169,10 @@ export default function JobForm({ job }: JobFormProps) {
                             control={form.control}
                             name="isActive"
                             render={({ field }) => (
-                                <FormItem className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
+                                <FormItem className="flex items-center justify-between border p-3 rounded shadow-sm">
                                     <FormLabel>Active</FormLabel>
                                     <FormControl>
-                                        <Switch
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
+                                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                                     </FormControl>
                                 </FormItem>
                             )}
@@ -136,72 +185,80 @@ export default function JobForm({ job }: JobFormProps) {
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Input {...field} disabled={isPending} />
+                                        <Textarea rows={4} {...field} disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
-                        <FormField
-                            control={form.control}
+                        <SelectField
                             name="jobType"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Job Type</FormLabel>
-                                    <FormControl>
-                                        <select {...field} className="w-full p-2 border rounded" disabled={isPending}>
-                                            <option value="">Select job type</option>
-                                            <option value="DEVELOPER">Developer</option>
-                                            <option value="TESTER">Tester</option>
-                                            <option value="DESIGNER">Designer</option>
-                                            <option value="MANAGER">Manager</option>
-                                        </select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            label="Job Type"
+                            options={[
+                                { value: "DEVELOPER", label: "Developer" },
+                                { value: "TESTER", label: "Tester" },
+                                { value: "DESIGNER", label: "Designer" },
+                                { value: "MANAGER", label: "Manager" },
+                            ]}
                         />
 
-                        <FormField
-                            control={form.control}
+                        {/*<FormField*/}
+                        {/*    control={form.control}*/}
+                        {/*    name="experience"*/}
+                        {/*    render={({ field }) => (*/}
+                        {/*        <FormItem>*/}
+                        {/*            <FormLabel>Experience (years)</FormLabel>*/}
+                        {/*            <FormControl>*/}
+                        {/*                <Input type="number" {...field} disabled={isPending} />*/}
+                        {/*            </FormControl>*/}
+                        {/*            <FormMessage />*/}
+                        {/*        </FormItem>*/}
+                        {/*    )}*/}
+                        {/*/>*/}
+
+                        {/*<SelectField*/}
+                        {/*    name="jobLevel"*/}
+                        {/*    label="Job Level"*/}
+                        {/*    options={[*/}
+                        {/*        { value: "TRAINEE", label: "Trainee" },*/}
+                        {/*        { value: "JUNIOR", label: "Junior" },*/}
+                        {/*        { value: "MID", label: "Mid" },*/}
+                        {/*        { value: "SENIOR", label: "Senior" },*/}
+                        {/*    ]}*/}
+                        {/*/>*/}
+
+                        <SelectField
+                            name="experienceLevel"
+                            label="Experience Level"
+                            options={[
+                                { value: "JUNIOR", label: "Junior" },
+                                { value: "MID", label: "Mid" },
+                                { value: "SENIOR", label: "Senior" },
+                            ]}
+                        />
+
+                        <SelectField
                             name="employmentType"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Employment Type</FormLabel>
-                                    <FormControl>
-                                        <select {...field} className="w-full p-2 border rounded" disabled={isPending}>
-                                            <option value="">Select employment type</option>
-                                            <option value="CONTRACT_OF_WORK">Contract of Work</option>
-                                            <option value="B2B">B2B</option>
-                                            <option value="CONTRACT_OF_MANDATE">Contract of Mandate</option>
-                                        </select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            label="Employment Type"
+                            options={[
+                                { value: "CONTRACT_OF_WORK", label: "Contract of Work" },
+                                { value: "B2B", label: "B2B" },
+                                { value: "CONTRACT_OF_MANDATE", label: "Contract of Mandate" },
+                            ]}
                         />
 
-                        <FormField
-                            control={form.control}
+                        <SelectField
                             name="workingType"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Working Type</FormLabel>
-                                    <FormControl>
-                                        <select {...field} className="w-full p-2 border rounded" disabled={isPending}>
-                                            <option value="">Select working type</option>
-                                            <option value="REMOTE">Remote</option>
-                                            <option value="OFFICE">Office</option>
-                                            <option value="HYBRID">Hybrid</option>
-                                        </select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            label="Working Type"
+                            options={[
+                                { value: "REMOTE", label: "Remote" },
+                                { value: "OFFICE", label: "Office" },
+                                { value: "HYBRID", label: "Hybrid" },
+                            ]}
                         />
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-4">
                             <FormField
                                 control={form.control}
                                 name="paymentFrom"
@@ -215,7 +272,6 @@ export default function JobForm({ job }: JobFormProps) {
                                     </FormItem>
                                 )}
                             />
-
                             <FormField
                                 control={form.control}
                                 name="paymentTo"
@@ -259,25 +315,10 @@ export default function JobForm({ job }: JobFormProps) {
                             )}
                         />
 
-                        <FormField
-                            control={form.control}
+                        <SelectField
                             name="companyId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Company</FormLabel>
-                                    <FormControl>
-                                        <select {...field} className="w-full p-2 border rounded" disabled={isPending}>
-                                            <option value="">Select company</option>
-                                            {companies.map((company) => (
-                                                <option key={company.id} value={company.id}>
-                                                    {company.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            label="Company"
+                            options={companies.map((c) => ({ label: c.name, value: c.id }))}
                         />
 
                         {error && <FormError message={error} />}

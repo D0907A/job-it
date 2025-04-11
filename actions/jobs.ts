@@ -3,7 +3,8 @@
 import { currentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
-import { EmploymentType, JobType, WorkingType } from "@prisma/client"
+import { $Enums, EmploymentType, JobType, WorkingType } from "@prisma/client"
+import ExperienceLevel = $Enums.ExperienceLevel
 
 async function isJobOwnedByUser(jobId: string, userId: string) {
     const job = await db.jobVacancy.findUnique({
@@ -29,6 +30,22 @@ export async function getJobsByUserId() {
     }
 }
 
+export async function getAllPublicJobs() {
+    try {
+        return await db.jobVacancy.findMany({
+            where: { isActive: true },
+            orderBy: { validUntil: "desc" },
+            include: {
+                company: true,
+                jobSkills: true,
+            },
+        })
+    } catch (error) {
+        console.error("[GET_PUBLIC_JOBS_ERROR]", error)
+        throw new Error("Failed to fetch public job listings")
+    }
+}
+
 export async function createJob(formData: FormData) {
     const user = await currentUser()
     if (!user?.id) throw new Error("User not authenticated")
@@ -38,6 +55,7 @@ export async function createJob(formData: FormData) {
         description,
         companyId,
         jobType,
+        experienceLevel,
         employmentType,
         workingType,
         paymentFrom,
@@ -53,13 +71,10 @@ export async function createJob(formData: FormData) {
                 title,
                 description,
                 isActive,
-                author: {
-                    connect: { id: user.id },
-                },
-                company: {
-                    connect: { id: companyId },
-                },
+                author: { connect: { id: user.id } },
+                company: { connect: { id: companyId } },
                 jobType,
+                experienceLevel,
                 employmentType,
                 workingType,
                 paymentFrom,
@@ -89,6 +104,7 @@ export async function updateJob(jobId: string, formData: FormData) {
         description,
         companyId,
         jobType,
+        experienceLevel,
         employmentType,
         workingType,
         paymentFrom,
@@ -101,16 +117,17 @@ export async function updateJob(jobId: string, formData: FormData) {
     const isOwner = await isJobOwnedByUser(jobId, user.id)
     if (!isOwner) throw new Error("Not authorized to edit this job")
 
+    console.log("[UPDATE_JOB_DATA]", experienceLevel)
+
     try {
         await db.jobVacancy.update({
             where: { id: jobId },
             data: {
                 title,
                 description,
-                company: {
-                    connect: { id: companyId },
-                },
+                company: { connect: { id: companyId } },
                 jobType,
+                experienceLevel,
                 employmentType,
                 workingType,
                 paymentFrom,
@@ -118,7 +135,7 @@ export async function updateJob(jobId: string, formData: FormData) {
                 validUntil,
                 isActive,
                 jobSkills: {
-                    deleteMany: {}, // remove old ones
+                    deleteMany: {},
                     ...(skills.length > 0 && {
                         create: skills.map((skill) => ({ skill })),
                     }),
@@ -188,22 +205,17 @@ export async function duplicateJob(jobId: string) {
                 title: `${job.title} (Copy)`,
                 description: job.description,
                 isActive: false,
-                author: {
-                    connect: { id: user.id },
-                },
-                company: {
-                    connect: { id: job.companyId },
-                },
+                author: { connect: { id: user.id } },
+                company: { connect: { id: job.companyId } },
                 jobType: job.jobType,
+                experienceLevel: job.experienceLevel,
                 employmentType: job.employmentType,
                 workingType: job.workingType,
                 paymentFrom: job.paymentFrom,
                 paymentTo: job.paymentTo,
                 validUntil: job.validUntil,
                 jobSkills: {
-                    create: job.jobSkills.map((s) => ({
-                        skill: s.skill,
-                    })),
+                    create: job.jobSkills.map((s) => ({ skill: s.skill })),
                 },
             },
         })
@@ -216,7 +228,6 @@ export async function duplicateJob(jobId: string) {
     }
 }
 
-
 function extractJobData(formData: FormData) {
     const title = formData.get("title")?.toString().trim()
     const description = formData.get("description")?.toString().trim()
@@ -224,6 +235,7 @@ function extractJobData(formData: FormData) {
     const jobType = formData.get("jobType") as JobType
     const employmentType = formData.get("employmentType") as EmploymentType
     const workingType = formData.get("workingType") as WorkingType
+    const experienceLevel = formData.get("experienceLevel")?.toString() as ExperienceLevel
 
     const isActiveRaw = formData.get("isActive")
     const isActive =
@@ -232,7 +244,6 @@ function extractJobData(formData: FormData) {
             : isActiveRaw === null
                 ? true
                 : false
-
 
     if (!title || !description || !companyId || !jobType || !employmentType || !workingType) {
         throw new Error("Missing required fields")
@@ -259,6 +270,7 @@ function extractJobData(formData: FormData) {
         isActive,
         companyId,
         jobType,
+        experienceLevel,
         employmentType,
         workingType,
         paymentFrom,

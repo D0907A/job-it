@@ -5,6 +5,7 @@ import {auth} from "@/auth";
 import {SessionProvider} from "next-auth/react";
 import {Toaster} from "@/components/ui/sonner";
 import {Navbar} from "@/app/portal/_components/navbar";
+import {EdgeStoreProvider} from "@/lib/edgestore";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -36,7 +37,7 @@ export default async function RootLayout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
             <Toaster/>
-            {children}
+            <EdgeStoreProvider>{children}</EdgeStoreProvider>
             </body>
             </html>
         </SessionProvider>

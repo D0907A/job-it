@@ -18,6 +18,7 @@ export function JobsList({ jobs, onSelectJob, selectedJob }: JobsListProps) {
                     className="cursor-pointer"
                 >
                     <JobCard
+                        id={job.id}
                         title={job.title}
                         salary={`${job.paymentFrom} – ${job.paymentTo} грн`}
                         company={job.company.name}
@@ -29,6 +30,7 @@ export function JobsList({ jobs, onSelectJob, selectedJob }: JobsListProps) {
                         employmentType={job.employmentType}
                         workingType={job.workingType}
                         validUntil={job.validUntil}
+                        authorId={job.authorId}
                         selected={selectedJob?.id === job.id}
                     />
                 </div>

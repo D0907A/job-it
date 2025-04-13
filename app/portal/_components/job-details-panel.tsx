@@ -20,8 +20,7 @@ export function JobDetailsPanel({ job, onClose }: JobDetailsPanelProps) {
                 <X className="w-5 h-5" />
             </button>
             <JobDetails job={job} />
-            <JobApplicationPanel/>
-
+            <JobApplicationPanel jobAuthorId={job.authorId}/>
         </div>
     )
 }

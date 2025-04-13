@@ -1,6 +1,7 @@
 export const publicRoutes = [
     "/",
     "/auth/_new-verification",
+    "/portal/jobs",
 
 ];
 

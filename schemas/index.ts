@@ -2,6 +2,16 @@ import * as z from "zod";
 import {UserRole, JobType, JobSkill, EmploymentType, WorkingType, ExperienceLevel} from "@prisma/client";
 import {date} from "zod";
 
+export const JobApplicationSchema = z.object({
+    fullName: z.string().min(1, "Ім'я є обов’язковим"),
+    email: z.string().email("Некоректна адреса електронної пошти"),
+    phone: z.string().optional(),
+    coverLetter: z.string().min(1, "Супровідний лист не може бути порожнім"),
+    resumeUrl: z.string().optional(),
+    jobVacancyId: z.string().min(1, "Необхідно вибрати вакансію"),
+    userId: z.string().optional(),
+});
+
 
 export const JobSchema = z.object({
     title: z.string().min(1, "Title is required"),

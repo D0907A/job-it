@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 
 interface JobCardProps {
+    id:string
     title: string
     salary: string
     company: string
@@ -20,11 +21,13 @@ interface JobCardProps {
     isHot?: boolean
     logoUrl?: string
     viewed?: boolean
+    authorId: string
     selected?: boolean
 }
 
 
 export const JobCard = ({
+                            id,
                             title,
                             salary,
                             company,
@@ -35,6 +38,7 @@ export const JobCard = ({
                             validUntil,
                             logoUrl,
                             viewed = false,
+                            authorId,
                             selected
                         }: JobCardProps) => {
     return (

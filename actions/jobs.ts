@@ -30,7 +30,7 @@ export async function getJobsByUserId() {
     }
 }
 
-export async function getAllPublicJobs() {
+export async function getAllPublicJobs(offset = 0, limit = 5) {
     try {
         return await db.jobVacancy.findMany({
             where: { isActive: true },
@@ -39,12 +39,15 @@ export async function getAllPublicJobs() {
                 company: true,
                 jobSkills: true,
             },
-        })
+            skip: offset,
+            take: limit,
+        });
     } catch (error) {
-        console.error("[GET_PUBLIC_JOBS_ERROR]", error)
-        throw new Error("Failed to fetch public job listings")
+        console.error("[GET_PUBLIC_JOBS_ERROR]", error);
+        throw new Error("Failed to fetch public job listings");
     }
 }
+
 
 export async function createJob(formData: FormData) {
     const user = await currentUser()

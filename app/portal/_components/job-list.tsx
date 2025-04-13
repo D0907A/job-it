@@ -6,9 +6,17 @@ interface JobsListProps {
     jobs: any[]
     onSelectJob: (job: any) => void
     selectedJob: any | null
+    onLoadMore?: () => void
+    hasMore?: boolean
 }
 
-export function JobsList({ jobs, onSelectJob, selectedJob }: JobsListProps) {
+export function JobsList({
+                             jobs,
+                             onSelectJob,
+                             selectedJob,
+                             onLoadMore,
+                             hasMore,
+                         }: JobsListProps) {
     return (
         <div className="space-y-4 overflow-y-auto h-full p-12">
             {jobs.map((job) => (
@@ -35,6 +43,18 @@ export function JobsList({ jobs, onSelectJob, selectedJob }: JobsListProps) {
                     />
                 </div>
             ))}
+
+            {/* Load More Button */}
+            {hasMore && onLoadMore && (
+                <div className="flex justify-center pt-6">
+                    <button
+                        onClick={onLoadMore}
+                        className="px-6 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md hover:shadow-lg transition duration-300"
+                    >
+                        Завантажити ще
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

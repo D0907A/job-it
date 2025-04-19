@@ -73,7 +73,7 @@ export default function CompanyForm({ company }: CompanyFormProps) {
                         const result = await createCompany(data);
                         if (result.success) {
                             setSuccess(result.success);
-                            router.push(`/company/${result.data.id}`);
+                            router.push(`/panel/companies/${result.data.id}`);
                         } else {
                             setError(result.error);
                         }
@@ -102,7 +102,7 @@ export default function CompanyForm({ company }: CompanyFormProps) {
     };
 
     return (
-        <Card className="w-[600px]">
+        <Card className="w-[600px] mx-auto">
             <CardHeader>
                 <p className="text-2xl font-semibold text-center">
                     {company ? "Edit Company" : "Create Company"}

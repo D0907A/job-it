@@ -10,10 +10,10 @@ import { BeatLoader } from "react-spinners";
 
 const CompanyList = ({ userCompanies }) => {
     const [companies, setCompanies] = useState(userCompanies);
-    const [deletingId, setDeletingId] = useState<string | null>(null); // Track currently deleting company
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const onClickDeleteCompany = async (companyId: string) => {
-        setDeletingId(companyId); // Set the loading state
+        setDeletingId(companyId);
 
         try {
             await deleteCompany(companyId);
@@ -21,54 +21,60 @@ const CompanyList = ({ userCompanies }) => {
         } catch (error) {
             console.error("Failed to delete company", error);
         } finally {
-            setDeletingId(null); // Reset loading state
+            setDeletingId(null);
         }
     };
 
     return (
-        <Card className="w-[600px] shadow-md">
-            <CardHeader>
-                <p className="text-2xl font-semibold text-center">Companies</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <>
-                    <div className="flex flex-row justify-end">
-                        <Button href="/new">Add new</Button>
+        <div className="w-full max-w-2xl px-4">
+            <Card>
+                <CardHeader>
+                    <p className="text-2xl font-semibold text-center">Companies</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex justify-end">
+                        <Link href="companies/new">
+                            <Button>Add new</Button>
+                        </Link>
                     </div>
-                    {companies.map((company) => (
-                        <div
-                            key={company.id}
-                            className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm hover:bg-gray-100 transition"
-                        >
-                            <Link href={`/company/${company.id}`} className="block flex-1">
-                                <p className="text-sm font-medium">{company.name}</p>
-                                <p className="truncate text-xs max-w-[180px] font-mono p-1 bg-slate-100 rounded-md">
-                                    {company.description || "No description"}
-                                </p>
-                            </Link>
-                            <div>
-                                <Button
-                                    onClick={() => onClickDeleteCompany(company.id)}
-                                    variant="destructive"
-                                    size="sm"
-                                    className="flex items-center gap-1"
-                                    disabled={deletingId === company.id} // Disable while deleting
-                                >
-                                    {deletingId === company.id ? (
-                                        <BeatLoader size={8} color="white" />
-                                    ) : (
-                                        <>
-                                            Delete
-                                            <Trash className="w-4 h-4" />
-                                        </>
-                                    )}
-                                </Button>
+
+                    <div className="space-y-3">
+                        {companies.map((company) => (
+                            <div
+                                key={company.id}
+                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border p-3 shadow-sm hover:bg-gray-100 transition"
+                            >
+                                <Link href={`companies/${company.id}`} className="block flex-1">
+                                    <p className="text-sm font-medium">{company.name}</p>
+                                    <p className="truncate text-xs font-mono p-1 bg-slate-100 rounded-md max-w-full sm:max-w-[180px]">
+                                        {company.description || "No description"}
+                                    </p>
+                                </Link>
+
+                                <div className="flex justify-end sm:justify-start">
+                                    <Button
+                                        onClick={() => onClickDeleteCompany(company.id)}
+                                        variant="destructive"
+                                        size="sm"
+                                        className="flex items-center gap-1"
+                                        disabled={deletingId === company.id}
+                                    >
+                                        {deletingId === company.id ? (
+                                            <BeatLoader size={8} color="white" />
+                                        ) : (
+                                            <>
+                                                Delete
+                                                <Trash className="w-4 h-4" />
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </>
-            </CardContent>
-        </Card>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
     );
 };
 

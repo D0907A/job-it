@@ -30,10 +30,28 @@ export async function getJobsByUserId() {
     }
 }
 
-export async function getAllPublicJobs(offset = 0, limit = 5) {
+export async function getAllPublicJobs(offset = 0, limit = 5, filters: Record<string, string[]> = {}) {
     try {
+        const whereClause: Record<string, any> = {
+            isActive: true,
+        };
+
+        for (const [key, values] of Object.entries(filters)) {
+            if (Array.isArray(values) && values.length > 0) {
+                if (key === 'title') {
+                    // пошук по частковому входженню в назву (case-insensitive)
+                    whereClause['title'] = {
+                        contains: values[0],
+                        mode: 'insensitive',
+                    };
+                } else {
+                    whereClause[key] = { in: values };
+                }
+            }
+        }
+
         return await db.jobVacancy.findMany({
-            where: { isActive: true },
+            where: whereClause,
             orderBy: { validUntil: "desc" },
             include: {
                 company: true,
@@ -47,6 +65,7 @@ export async function getAllPublicJobs(offset = 0, limit = 5) {
         throw new Error("Failed to fetch public job listings");
     }
 }
+
 
 
 export async function createJob(formData: FormData) {

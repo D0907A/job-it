@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import {JobApplicationSchema} from "@/schemas";
+// import {ApplicationStatus} from "@prisma/client";
 
 export async function createJobApplication(data: unknown) {
     // Create a mutable copy of the data.
@@ -44,4 +45,48 @@ export async function createJobApplication(data: unknown) {
         console.error("Error creating job application:", error);
         throw error;
     }
+}
+
+export async function getApplicationsForUserJobs() {
+    const user = await currentUser();
+    if (!user) {
+        return [];
+    }
+
+    const applications = await db.jobApplication.findMany({
+        where: {
+            jobVacancy: {
+                authorId: user.id,
+            },
+        },
+        select: {
+            id: true,
+            applicantName: true,
+            email: true,
+            phone: true,
+            coverLetter: true,
+            resumeUrl: true,
+            createdAt: true,
+            jobVacancy: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+        },
+        orderBy: { createdAt: "desc" },
+    });
+
+    return applications;
+}
+
+export async function updateApplicationStatus(
+    applicationId: string,
+    status
+) {
+    const updated = await db.jobApplication.update({
+        where: { id: applicationId },
+        data: { status },
+    });
+    return updated;
 }

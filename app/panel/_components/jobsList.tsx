@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 import { deleteJob, duplicateJob } from '@/actions/jobs'
-import {Card} from "@/components/ui/card";
 
 export default function JobsList({ jobs }: { jobs: any[] }) {
     const [jobList, setJobList] = useState(jobs)
@@ -42,14 +41,14 @@ export default function JobsList({ jobs }: { jobs: any[] }) {
     }
 
     return (
-        <div>
+        <CardLayout title="My Job Listings" createHref="jobs/new" backUrl="/dashboard">
             {jobList.length === 0 ? (
                 <p className="text-muted-foreground text-center">No job listings found.</p>
             ) : (
                 jobList.map((job) => (
                     <div
                         key={job.id}
-                        className="relative flex flex-col gap-4 border rounded-xl m-4 p-5 shadow-md hover:shadow-lg hover:border-primary/20 transition bg-white"
+                        className="relative flex flex-col gap-4 border rounded-xl p-5 shadow-md hover:shadow-lg hover:border-primary/20 transition bg-white"
                     >
                         {/* Title & Status */}
                         <div className="flex justify-between items-start flex-wrap gap-2">
@@ -165,6 +164,6 @@ export default function JobsList({ jobs }: { jobs: any[] }) {
                     </div>
                 ))
             )}
-        </div>
+        </CardLayout>
     )
 }

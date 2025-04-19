@@ -57,6 +57,15 @@ enum Skill {
   NODE
 }
 
+enum ApplicationStatus {
+  NEW
+  PENDING
+  STARRED
+  INTERVIEW
+  REJECTED
+  ACCEPTED
+}
+
 model User {
   id                    String                 @id @default(cuid())
   name                  String?
@@ -165,21 +174,18 @@ model JobVacancy {
 }
 
 model JobApplication {
-  id            String   @id @default(cuid())
+  id            String            @id @default(cuid())
   applicantName String
   email         String
   phone         String?
   coverLetter   String
   resumeUrl     String?
-  createdAt     DateTime @default(now())
-
-  // Relation to JobVacancy (required)
-  jobVacancy   JobVacancy @relation(fields: [jobVacancyId], references: [id])
-  jobVacancyId String
-
-  // Optional relation to the User
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
+  createdAt     DateTime          @default(now())
+  jobVacancy    JobVacancy        @relation(fields: [jobVacancyId], references: [id])
+  jobVacancyId  String
+  userId        String?
+  user          User?             @relation(fields: [userId], references: [id])
+  status        ApplicationStatus @default(NEW)
 }
 
 model JobSkill {

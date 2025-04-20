@@ -1,31 +1,71 @@
-// inside your ApplicationsList item rendering...
-import { updateApplicationStatus } from "@/actions/application";
-import { APPLICATION_STATUSES } from "@/constants";
+'use client'
 
-function StatusPicker({ appId, current }: { appId: string; current: string }) {
-    const [status, setStatus] = useState(current);
-    const [updating, setUpdating] = useState(false);
+import { useEffect, useState } from 'react'
+import { updateApplicationStatus } from '@/actions/application'
+import {toast} from "sonner";
 
-    const onChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newStatus = e.target.value as keyof typeof APPLICATION_STATUSES[number];
-        setUpdating(true);
-        await updateApplicationStatus(appId, newStatus);
-        setStatus(newStatus);
-        setUpdating(false);
-    };
+
+const STATUSES = [
+    { value: 'NEW', label: 'New' },
+    { value: 'PENDING', label: 'Pending' },
+    { value: 'STARRED', label: 'Starred' },
+    { value: 'INTERVIEW', label: 'Interview' },
+    { value: 'REJECTED', label: 'Rejected' },
+    { value: 'ACCEPTED', label: 'Accepted' },
+] as const
+
+export type StatusValue = typeof STATUSES[number]['value']
+
+interface StatusPickerProps {
+    appId: string
+    current: StatusValue
+    onStatusChange: (newStatus: StatusValue) => void
+}
+
+export function StatusPicker({ appId, current, onStatusChange }: StatusPickerProps) {
+    const [status, setStatus] = useState<StatusValue>('NEW')
+    const [updating, setUpdating] = useState(false)
+
+    useEffect(() => {
+        if (STATUSES.some(s => s.value === current)) {
+            setStatus(current)
+        } else {
+            setStatus('NEW')
+        }
+    }, [current])
+
+    const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newStatus = e.target.value as StatusValue
+        setStatus(newStatus)
+        onStatusChange(newStatus)
+
+        setUpdating(true)
+        try {
+            await updateApplicationStatus(appId, newStatus)
+        } catch (err) {
+            console.error('Failed to update status', err)
+            setStatus(current)
+            onStatusChange(current)
+        } finally {
+            setUpdating(false)
+            toast.success("Status updated")
+        }
+    }
 
     return (
         <select
             value={status}
-            onChange={onChange}
+            onChange={handleChange}
             disabled={updating}
-            className="rounded border px-2 py-1 text-sm"
+            className="text-xs font-medium px-2 py-0.5 rounded-full border border-gray-300 bg-white shadow-sm focus:outline-none"
         >
-            {APPLICATION_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                    {s[0] + s.slice(1).toLowerCase()}
+            {STATUSES.map(({ value, label }) => (
+                <option key={value} value={value}>
+                    {label}
                 </option>
             ))}
         </select>
-    );
+    )
 }
+
+export { STATUSES }

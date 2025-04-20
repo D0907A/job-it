@@ -9,10 +9,11 @@ export default auth((req) => {
     const isLoggedIn = !!req.auth;
 
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+    const isEdgeStoreRoute = nextUrl.pathname.startsWith("/api/edgestore"); // ✅ allow upload API
     const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-    if (isApiAuthRoute) {
+    if (isApiAuthRoute || isEdgeStoreRoute) {
         return null;
     }
 

@@ -14,7 +14,7 @@ type Context = {
 async function createContext({ req }: { req: Request }): Promise<Context> {
     const user = await currentUser();
 
-    console.log("User context:", user.id, user.role);
+    // console.log("User context:", user.id, user.role);
 
 
     return {
@@ -26,7 +26,7 @@ async function createContext({ req }: { req: Request }): Promise<Context> {
 const es = initEdgeStore.context<Context>().create();
 
 const edgeStoreRouter = es.router({
-    myPublicImages: es.imageBucket(),
+    publicCompanyImages: es.imageBucket(),
 
     myProtectedFiles: es
         .fileBucket()

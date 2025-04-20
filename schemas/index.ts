@@ -50,6 +50,7 @@ interface CompanyFormProps {
 export const CompanySchema = z.object({
     id: z.string().optional(),
     name: z.string(),
+    imageUrl: z.string().url().optional(),
     description: z.string().optional(),
 });
 

@@ -19,7 +19,8 @@ export function JobsList({
                          }: JobsListProps) {
     return (
         <div className="space-y-4 overflow-y-auto h-full p-12">
-            {jobs.map((job) => (
+            {
+                jobs.map((job) => (
                 <div
                     key={job.id}
                     onClick={() => onSelectJob(job)}
@@ -40,6 +41,9 @@ export function JobsList({
                         validUntil={job.validUntil}
                         authorId={job.authorId}
                         selected={selectedJob?.id === job.id}
+                        jobLevel={job.experienceLevel}
+                        jobType={job.jobType}
+                        imageUrl={job.company.imageUrl}
                     />
                 </div>
             ))}

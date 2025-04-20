@@ -1,28 +1,27 @@
-"use server";
+'use server';
 
 import { db } from "@/lib/db";
 import { currentUser } from "@/lib/auth";
 import {JobApplicationSchema} from "@/schemas";
-// import {ApplicationStatus} from "@prisma/client";
 
 export async function createJobApplication(data: unknown) {
-    // Create a mutable copy of the data.
     const inputData = typeof data === "object" && data !== null ? { ...data } : {};
 
-    // Retrieve the current user.
     const user = await currentUser();
-
-    // Set the userId accordingly.
     if (user) {
         (inputData as any).userId = user.id;
     }
-    // Validate incoming data using Zod.
+
+    // Validate form input
     const parsed = JobApplicationSchema.safeParse(inputData);
     if (!parsed.success) {
-        throw new Error(JSON.stringify(parsed.error.flatten().fieldErrors));
+        return {
+            error: "Invalid form data",
+            details: parsed.error.flatten().fieldErrors,
+        };
     }
 
-    // Build the data object for Prisma.
+    // Build data for Prisma
     const createData: any = {
         applicantName: parsed.data.fullName,
         email: parsed.data.email,
@@ -39,26 +38,44 @@ export async function createJobApplication(data: unknown) {
     }
 
     try {
-        const application = await db.jobApplication.create({ data: createData });
-        return { success: "Application created successfully", data: application };
+        const application = await db.jobApplication.create({
+            data: createData,
+        });
+
+        return {
+            success: true,
+            data: application,
+        };
     } catch (error) {
         console.error("Error creating job application:", error);
-        throw error;
+        return { error: "Failed to create application" };
     }
 }
 
-export async function getApplicationsForUserJobs() {
-    const user = await currentUser();
-    if (!user) {
-        return [];
+
+
+export async function fetchApplicationsWithFilters(filters: { status?: string; name?: string }) {
+    const user = await currentUser()
+    if (!user) return []
+
+    const where: any = {
+        jobVacancy: { authorId: user.id },
     }
 
-    const applications = await db.jobApplication.findMany({
-        where: {
-            jobVacancy: {
-                authorId: user.id,
-            },
-        },
+    if (filters.status) {
+        where.status = filters.status
+    }
+
+    if (filters.name) {
+        where.applicantName = {
+            contains: filters.name,
+            mode: 'insensitive',
+        }
+    }
+
+    const apps = await db.jobApplication.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
         select: {
             id: true,
             applicantName: true,
@@ -67,6 +84,46 @@ export async function getApplicationsForUserJobs() {
             coverLetter: true,
             resumeUrl: true,
             createdAt: true,
+            status: true,
+            jobVacancy: {
+                select: { id: true, title: true },
+            },
+        },
+    })
+
+    return apps
+}
+
+export async function getApplicationsForUserJobs(filters?: { status?: string; name?: string }) {
+    const user = await currentUser();
+    if (!user) return [];
+
+    const where: any = {
+        jobVacancy: { authorId: user.id },
+    };
+
+    if (filters?.status) {
+        where.status = filters.status;
+    }
+
+    if (filters?.name) {
+        where.applicantName = {
+            contains: filters.name,
+            mode: 'insensitive',
+        };
+    }
+
+    const applications = await db.jobApplication.findMany({
+        where,
+        select: {
+            id: true,
+            applicantName: true,
+            email: true,
+            phone: true,
+            coverLetter: true,
+            resumeUrl: true,
+            createdAt: true,
+            status: true,
             jobVacancy: {
                 select: {
                     id: true,
@@ -74,11 +131,12 @@ export async function getApplicationsForUserJobs() {
                 },
             },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
     });
 
     return applications;
 }
+
 
 export async function updateApplicationStatus(
     applicationId: string,
@@ -90,3 +148,36 @@ export async function updateApplicationStatus(
     });
     return updated;
 }
+
+export async function deleteApplication(applicationId: string) {
+    const user = await currentUser();
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    // Ensure the application belongs to a job created by this user
+    const application = await db.jobApplication.findUnique({
+        where: { id: applicationId },
+        include: {
+            jobVacancy: {
+                select: { authorId: true },
+            },
+        },
+    });
+
+    if (!application || application.jobVacancy.authorId !== user.id) {
+        throw new Error("Not allowed to delete this application");
+    }
+
+    try {
+        await db.jobApplication.delete({
+            where: { id: applicationId },
+        });
+
+        return { success: "Application deleted successfully" };
+    } catch (error) {
+        console.error("Error deleting job application:", error);
+        throw new Error("Failed to delete application");
+    }
+}
+

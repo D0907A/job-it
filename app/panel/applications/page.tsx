@@ -1,8 +1,13 @@
-// app/portal/applications/page.tsx
-import { getApplicationsForUserJobs } from "@/actions/application";
-import ApplicationsList from "@/app/panel/_components/applications-list";
+import { FilterSidebar } from "@/app/panel/_components/applications-filter"
+import { ApplicationsList } from "@/app/panel/_components/applications-list"
 
-export default async function ApplicationsPage() {
-    const initialApps = await getApplicationsForUserJobs();
-    return <ApplicationsList initialApps={initialApps} />;
+export default function Page() {
+    return (
+        <div className="flex gap-6 p-6">
+            <div className="flex-1 space-y-4 max-w-3xl">
+                <ApplicationsList />
+            </div>
+            <FilterSidebar />
+        </div>
+    )
 }

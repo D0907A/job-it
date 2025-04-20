@@ -2,7 +2,8 @@ export const publicRoutes = [
     "/",
     "/auth/_new-verification",
     "/portal/jobs",
-
+    "/api/edgestore",
+    "/app/actions/application"
 ];
 
 export const authRoutes = [

@@ -55,42 +55,44 @@ export default function JobsApplicationPanel({ jobAuthorId }: { jobAuthorId: str
         }
     };
 
-    // onSubmit handler – if a file is selected and not yet uploaded, upload it first.
     const onSubmit = async (data: JobApplicationFormData) => {
-        startTransition(async () => {
-            // If file is selected and resumeUrl not set, upload file.
-            let submissionData = data;
-            if (file && !data.resumeUrl) {
-                try {
-                    const res = await edgestore.myProtectedFiles.upload({
-                        file,
-                        onProgressChange: (prog) => setProgress(prog),
-                        input: { ownerId: jobAuthorId },
-                    });
+        let submissionData = data
 
-                    submissionData = { ...data, resumeUrl: res.url };
-                    setValue("resumeUrl", res.url);
-                } catch (uploadError) {
-                    console.error("File upload failed:", uploadError);
-                    return;
-                }
-            }
-
-            // Submit the form data along with the jobVacancyId.
+        if (file && !data.resumeUrl) {
             try {
-                const result = await createJobApplication(submissionData);
-                console.log("Job Application saved", result);
-                setSubmitted(true);
-                reset();
-                setFile(null);
-                setProgress(0);
-                // Optionally, navigate away:
-                // router.push("/jobs");
-            } catch (error) {
-                console.error("Error saving application:", error);
+                const res = await edgestore.myProtectedFiles.upload({
+                    file,
+                    onProgressChange: (prog) => setProgress(prog),
+                    input: { ownerId: jobAuthorId },
+                })
+
+                submissionData = { ...data, resumeUrl: res.url }
+                setValue("resumeUrl", res.url)
+            } catch (uploadError) {
+                console.error("File upload failed:", uploadError)
+                return
             }
-        });
+        }
+
+        try {
+            console.log("submissionData", JSON.stringify(submissionData));
+            const result = await createJobApplication(submissionData)
+
+            if (!result || typeof result !== 'object' || 'error' in result) {
+                throw new Error(result?.error || 'Unknown server error')
+            }
+
+            console.log("Job Application saved", result)
+            setSubmitted(true)
+            reset()
+            setFile(null)
+            setProgress(0)
+        } catch (error) {
+            console.error("Error saving application:", error)
+            alert("Не вдалося надіслати відгук. Спробуйте пізніше.")
+        }
     };
+
 
     return (
         <div className="space-y-6 p-6 bg-white text-gray-900 rounded-2xl shadow-lg border border-slate-200">
@@ -230,12 +232,6 @@ export default function JobsApplicationPanel({ jobAuthorId }: { jobAuthorId: str
                         <p className="text-lg text-gray-800">
                             Ваш відгук на вакансію було успішно надіслано.
                         </p>
-                        <Link
-                            href="/jobs"
-                            className="inline-block px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
-                        >
-                            Повернутись до вакансій
-                        </Link>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -23,12 +23,16 @@ import { FormError } from "@/components/form-error";
 import {createCompany, updateCompany} from "@/actions/company";
 import { CompanySchema } from "@/schemas";
 import {redirect, useRouter} from "next/navigation";
+import {useEdgeStore} from "@/lib/edgestore";
+import {UploaderProvider} from "@/components/upload/uploader-provider";
+import {SingleImageDropzone} from "@/components/upload/single-image";
 
 type CompanyFormData = z.infer<typeof CompanySchema>;
 
 interface Company {
     id: string;
     name: string;
+    imageUrl: string;
     description: string | null;
     ownerId: string;
 }
@@ -43,7 +47,8 @@ export default function CompanyForm({ company }: CompanyFormProps) {
         resolver: zodResolver(CompanySchema),
         defaultValues: {
             name: company?.name,
-            description: company?.description | ""
+            description: company?.description | "",
+            imageUrl: company?.imageUrl ?? "",
         },
     });
 
@@ -52,9 +57,12 @@ export default function CompanyForm({ company }: CompanyFormProps) {
             form.reset({
                 name: company.name,
                 description: company.description ?? "",
+                imageUrl: company.imageUrl ?? "",
             });
         }
     }, [company, form]);
+
+
 
     const [error, setError] = useState<string>();
     const [success, setSuccess] = useState<string>();
@@ -147,6 +155,48 @@ export default function CompanyForm({ company }: CompanyFormProps) {
                                     </FormItem>
                                 )}
                             />
+
+                            <FormField
+                                control={form.control}
+                                name="imageUrl"
+                                render={({ field }) => {
+                                    const { edgestore } = useEdgeStore();   // EdgeStore client
+                                    return (
+                                        <FormItem>
+                                            <FormLabel>Logo / cover image</FormLabel>
+
+                                            <UploaderProvider
+                                                autoUpload
+                                                uploadFn={async ({ file, signal, onProgressChange }) =>
+                                                    edgestore.publicCompanyImages.upload({
+                                                        file,
+                                                        signal,
+                                                        onProgressChange,
+                                                    })
+                                                }
+                                                onUploadCompleted={({ url }) => field.onChange(url)}
+                                            >
+                                                <SingleImageDropzone
+                                                    width={320}
+                                                    height={320}
+                                                    disabled={isPending}
+                                                    dropzoneOptions={{ maxSize: 1024 * 1024 * 2 }} // 2 MB
+                                                />
+                                            </UploaderProvider>
+
+                                            {field.value && (
+                                                <img
+                                                    src={field.value}
+                                                    alt="preview"
+                                                    className="h-24 mt-2 rounded border"
+                                                />
+                                            )}
+                                            <FormMessage />
+                                        </FormItem>
+                                    );
+                                }}
+                            />
+
 
                             {error && <FormError message={error} />}
                             {success && <FormSuccess message={success} />}

@@ -12,24 +12,14 @@ export const createCompany = async (company) => {
         throw new Error("User not authenticated");
     }
 
-    console.log("Creating company for user:", user.id);
-
     const newCompany = await db.company.create({
         data: {
             name: company.name,
             description: company.description,
+            imageUrl: company.imageUrl,
             ownerId: user.id,
         },
     });
-
-    //just a testing method
-    // await db.company.create({
-    //     data: {
-    //         name: "company.name",
-    //         description: "company.description",
-    //         ownerId: user.id,
-    //     },
-    // });
 
     return {data: newCompany,success: "Company created successfully"};
 };
@@ -71,7 +61,7 @@ export const getUserCompany = async () => {
 export const updateCompany = async (
     values: z.infer<typeof CompanySchema>
 ) => {
-    const { id, name, description } = values;
+    const { id, name, description, imageUrl } = values;
 
     const user = await currentUser();
 
@@ -86,6 +76,7 @@ export const updateCompany = async (
             data: {
                 name,
                 description: description ?? null,
+                imageUrl: imageUrl ?? null,
             },
         });
 

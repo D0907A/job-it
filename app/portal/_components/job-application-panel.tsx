@@ -56,6 +56,8 @@ export default function JobsApplicationPanel({ jobAuthorId }: { jobAuthorId: str
     };
 
     const onSubmit = async (data: JobApplicationFormData) => {
+
+        console.log("press submitted");
         let submissionData = data
 
         if (file && !data.resumeUrl) {

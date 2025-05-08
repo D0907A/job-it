@@ -100,8 +100,8 @@ export default function JobForm({ job }: JobFormProps) {
                     await updateJob(job.id, formData);
                     setSuccess("Job updated successfully");
                 } else {
-                    await createJob(formData);
-                    router.push("/jobs");
+                    const createdJob = await createJob(formData);
+                    router.push(`/panel/jobs/${createdJob.id}`);
                 }
             } catch (err) {
                 console.error(err);
@@ -241,9 +241,9 @@ export default function JobForm({ job }: JobFormProps) {
                                 name="workingType"
                                 label="Working Type"
                                 options={[
-                                    { value: "REMOTE", value: "Remote"   },
-                                    { value: "OFFICE", value: "Office"   },
-                                    { value: "HYBRID", value: "Hybrid"   },
+                                    { value: "REMOTE", label: "Remote"   },
+                                    { value: "OFFICE", label: "Office"   },
+                                    { value: "HYBRID", label: "Hybrid"   },
                                 ]}
                             />
 

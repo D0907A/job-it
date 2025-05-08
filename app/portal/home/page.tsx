@@ -69,7 +69,7 @@ const categories = [
 const HomePage = () => {
     return (
         <div className="min-h-screen flex flex-col">
-            {/* Header */}ъ
+            {/* Header */}
 
             {/* Hero Section */}
             <main className="flex-grow max-w-7xl mx-auto px-4 py-8">
@@ -84,7 +84,7 @@ const HomePage = () => {
                         </p>
                         <div className="mt-8">
                             <a
-                                href="/jobs"
+                                href="/portal/jobs"
                                 className="px-8 py-4 bg-green-600 hover:bg-green-700 transition-colors text-white font-semibold rounded-lg shadow-lg"
                             >
                                 Browse Jobs

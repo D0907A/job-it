@@ -7,61 +7,42 @@ import {
     useSearchParams,
 } from "next/navigation";
 
-import { getAllPublicJobs } from "@/actions/jobs";
+import { getJobs } from "@/actions/jobs";
 import { JobsList } from "@/app/portal/_components/job-list";
 import { JobDetailsPanel } from "@/app/portal/_components/job-details-panel";
 import { JobDetailsDrawer } from "@/app/portal/_components/jobs-details-drawer";
 import { JobFilters } from "@/app/portal/_components/job-filter";
 
-const PAGE_SIZE = 2;
-
 export default function JobsPage() {
-    const [jobs, setJobs] = useState<any[]>([]);
     const [selectedJob, setSelectedJob] = useState<any | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [jobs, setJobs] = useState([]);
     const [offset, setOffset] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [filters, setFilters] = useState({});
 
-    const router = useRouter();
-    const pathname = usePathname();          //  NEW
     const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const router = useRouter();
 
-    /* ---------- data loading ---------- */
+    // Extract filters from URL on mount
+    const getFiltersFromParams = () => {
+        const entries = Array.from(searchParams.entries());
+        const filters: Record<string, any> = {};
 
-    const loadJobs = async (newOffset = 0, newFilters = filters) => {
-        try {
-            const data = await getAllPublicJobs(newOffset, PAGE_SIZE, newFilters);
-
-            if (newOffset === 0) {
-                setJobs(data);
-                setHasMore(data.length === PAGE_SIZE);
+        for (const [key, value] of entries) {
+            if (key === "title") {
+                filters[key] = value;
             } else {
-                setJobs((prev) => [...prev, ...data]);
-                if (data.length < PAGE_SIZE) setHasMore(false);
+                filters[key] = value.split(",");
             }
-        } catch (err) {
-            console.error("Failed to fetch jobs:", err);
         }
+
+        return filters;
     };
 
-    useEffect(() => {
-        loadJobs(0);
-        setOffset(PAGE_SIZE);
-    }, []);
+    const [filters, setFilters] = useState(getFiltersFromParams());
 
-    /* ---------- URL → state sync ---------- */
-
-    useEffect(() => {
-        const jobId = searchParams.get("job");
-        if (jobId && jobs.length) {
-            const found = jobs.find((j) => j.id === jobId);
-            if (found) setSelectedJob(found);
-        }
-    }, [jobs, searchParams]);
-
-    /* ---------- responsive check ---------- */
-
+    // Handle screen size
     useEffect(() => {
         const onResize = () => setIsMobile(window.innerWidth < 768);
         onResize();
@@ -69,36 +50,62 @@ export default function JobsPage() {
         return () => window.removeEventListener("resize", onResize);
     }, []);
 
-    /* ---------- helpers ---------- */
+    // Load initial jobs
+    useEffect(() => {
+        loadJobs(0, true);
+    }, [filters]);
 
-    const handleSelectJob = (job: any) => {
+    const handleSelectJob = async (job) => {
         setSelectedJob(job);
-        router.push(`?job=${job.id}`);
+        router.push(`${pathname}?${searchParams.toString()}&job=${job.id}`);
     };
 
-    const handleClose = () => {              //  NEW
+    const handleClose = () => {
         setSelectedJob(null);
-        router.replace(pathname);              //  removes the entire query‑string
+
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("job");
+
+        router.replace(`${pathname}?${params.toString()}`);
     };
 
-    const handleLoadMore = () => {
-        loadJobs(offset);
-        setOffset((prev) => prev + PAGE_SIZE);
+    const loadJobs = async (startOffset = offset, reset = false) => {
+        setIsLoading(true);
+        const fetchedJobs = await getJobs(startOffset, 5, filters);
+
+        setJobs(prev => {
+            const combined = reset ? fetchedJobs : [...prev, ...fetchedJobs];
+            const unique = new Map();
+            for (const job of combined) {
+                unique.set(job.id, job);
+            }
+            return Array.from(unique.values());
+        });
+
+        setOffset(startOffset + 5);
+        setIsLoading(false);
+    };
+
+    const applyFilters = (newFilters: Record<string, any>) => {
+        setFilters(newFilters);
+
+        const params = new URLSearchParams();
+        for (const [key, value] of Object.entries(newFilters)) {
+            if (Array.isArray(value) && value.length > 0) {
+                params.set(key, value.join(","));
+            } else if (typeof value === "string" && value.trim() !== "") {
+                params.set(key, value);
+            }
+        }
+
+        router.replace(`${pathname}?${params.toString()}`);
     };
 
     return (
         <>
-            <JobFilters
-                filters={filters}
-                onChange={(newFilters) => {
-                    setFilters(newFilters);
-                    setOffset(PAGE_SIZE);
-                    setHasMore(true);
-                    loadJobs(0, newFilters);
-                }}
-            />
+            <JobFilters filters={filters} onChange={applyFilters} />
 
-            <div className="flex max-w-[1200px] mx-auto h-[calc(100vh-100px)] px-4 gap-6">
+            <div className="flex max-w-[1200px] mx-auto h-[calc(100vh-300px)] px-4 gap-6">
                 <div
                     className={`transition-all duration-300 ease-in-out ${
                         selectedJob && !isMobile ? "w-1/2" : "w-full"
@@ -108,9 +115,19 @@ export default function JobsPage() {
                         jobs={jobs}
                         selectedJob={selectedJob}
                         onSelectJob={handleSelectJob}
-                        onLoadMore={handleLoadMore}
-                        hasMore={hasMore}
                     />
+                    <div className="flex justify-center pt-6">
+                        {isLoading ? (
+                            <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <button
+                                onClick={() => loadJobs()}
+                                className="px-6 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md hover:shadow-lg transition duration-300"
+                            >
+                                Завантажити ще
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {selectedJob && (

@@ -1,14 +1,12 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-
 import {
     Card,
     CardHeader,
     CardContent,
     CardFooter,
 } from "@/components/ui/card";
-
 import {
     Form,
     FormField,
@@ -17,10 +15,8 @@ import {
     FormControl,
     FormMessage,
 } from "@/components/ui/form";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import {
     Select,
     SelectTrigger,
@@ -32,7 +28,7 @@ import {
 interface FilterValues {
     search: string;
     status: "ALL" | "ACTIVE" | "INACTIVE";
-    type: string; // will be "" | "TECH" | "FINANCE" | "HEALTH"
+    type: string; // Optional: could be "" | "TECH" | "FINANCE" | "HEALTH"
 }
 
 export function FiltersPanel() {
@@ -46,7 +42,7 @@ export function FiltersPanel() {
 
     const onSubmit = (values: FilterValues) => {
         console.log("apply filters", values);
-        // e.g. router.push({ query: { ...values, type: values.type || undefined } })
+        // Optionally: use router.push() to apply URL filters
     };
 
     const onClear = () => {
@@ -55,31 +51,28 @@ export function FiltersPanel() {
             status: "ALL",
             type: "",
         });
-        // clear your query params if needed
+        // Optionally: clear URL filters here
     };
 
     return (
-        <Card className="sticky top-20">
+        <Card className="sticky top-20 w-full shadow-md">
             <CardHeader>
-                <h3 className="text-lg font-semibold">Filters</h3>
+                <h2 className="text-lg font-semibold text-gray-900">Фільтри</h2>
             </CardHeader>
 
             <CardContent>
                 <Form {...form}>
-                    <form
-                        onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4"
-                    >
-                        {/* Search */}
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Search Input */}
                         <FormField
                             control={form.control}
                             name="search"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Company Name</FormLabel>
+                                    <FormLabel>Назва компанії</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Search…"
+                                            placeholder="Пошук…"
                                             {...field}
                                         />
                                     </FormControl>
@@ -88,25 +81,25 @@ export function FiltersPanel() {
                             )}
                         />
 
-                        {/* Status */}
+                        {/* Status Dropdown */}
                         <FormField
                             control={form.control}
                             name="status"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Status</FormLabel>
+                                    <FormLabel>Статус</FormLabel>
                                     <FormControl>
                                         <Select
                                             onValueChange={field.onChange}
                                             value={field.value}
                                         >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="All" />
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Усі" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="ALL">All</SelectItem>
-                                                <SelectItem value="ACTIVE">Active</SelectItem>
-                                                <SelectItem value="INACTIVE">Inactive</SelectItem>
+                                                <SelectItem value="ALL">Усі</SelectItem>
+                                                <SelectItem value="ACTIVE">Активна</SelectItem>
+                                                <SelectItem value="INACTIVE">Неактивна</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
@@ -114,16 +107,41 @@ export function FiltersPanel() {
                                 </FormItem>
                             )}
                         />
-                        <CardFooter className="flex justify-between">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={onClear}
-                            >
-                                Clear
+
+                        {/* Optional: Add Company Type Filter
+                        <FormField
+                            control={form.control}
+                            name="type"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Тип</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Всі типи" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="">Всі типи</SelectItem>
+                                                <SelectItem value="TECH">Tech</SelectItem>
+                                                <SelectItem value="FINANCE">Finance</SelectItem>
+                                                <SelectItem value="HEALTH">Health</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                        */}
+
+                        <CardFooter className="flex justify-between p-0 pt-2">
+                            <Button variant="outline" type="button" size="sm" onClick={onClear}>
+                                Очистити
                             </Button>
                             <Button type="submit" size="sm">
-                                Apply
+                                Застосувати
                             </Button>
                         </CardFooter>
                     </form>

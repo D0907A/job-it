@@ -1,31 +1,20 @@
-import {getJobById} from "@/actions/jobs";
-import CardLayout from "@/app/panel/_components/admin-card-layout";
+import { getJobById } from "@/actions/jobs";
 import JobForm from "@/app/panel/_components/job-form";
-import {notFound} from "next/navigation";
-import {Card} from "@/components/ui/card";
-
+import { notFound } from "next/navigation";
 
 interface JobPageProps {
-    params: { jobId: string }
+    params: { jobId: string };
 }
 
 export default async function JobPage({ params }: JobPageProps) {
-    const { jobId } = params
+    const jobId = params.jobId;
 
     if (jobId === 'new') {
-        return (
-            <div>
-                <JobForm job={null}/>
-            </div>
-        );
+        return <JobForm job={null} />;
     }
 
-    const job = await getJobById(jobId)
-    if (!job) return notFound()
+    const job = await getJobById(jobId);
+    if (!job) return notFound();
 
-    return (
-        <div>
-            <JobForm job={job} />
-        </div>
-    )
+    return <JobForm job={job} />;
 }

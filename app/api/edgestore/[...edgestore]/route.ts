@@ -18,8 +18,8 @@ async function createContext({ req }: { req: Request }): Promise<Context> {
 
 
     return {
-        userId: user.id,
-        userRole: user.role ?? "USER", // fallback if role is undefined
+        userId: user?.id ?? "guest",
+        userRole: user?.role ?? "USER",
     };
 }
 

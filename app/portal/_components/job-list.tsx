@@ -7,7 +7,6 @@ interface JobsListProps {
     onSelectJob: (job: any) => void
     selectedJob: any | null
     onLoadMore?: () => void
-    hasMore?: boolean
 }
 
 export function JobsList({
@@ -33,7 +32,7 @@ export function JobsList({
                         company={job.company.name}
                         location={job.company.location || 'Не вказано'}
                         description={job.description}
-                        isHot={job.title.toLowerCase().includes('sql')}
+                        // isHot={job.title.toLowerCase().includes('sql')}
                         logoUrl={job.company.logoUrl}
                         skills={job.jobSkills?.map((s: any) => s.skill) || []}
                         employmentType={job.employmentType}
@@ -47,18 +46,6 @@ export function JobsList({
                     />
                 </div>
             ))}
-
-            {/* Load More Button */}
-            {hasMore && onLoadMore && (
-                <div className="flex justify-center pt-6">
-                    <button
-                        onClick={onLoadMore}
-                        className="px-6 py-2 rounded-xl text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md hover:shadow-lg transition duration-300"
-                    >
-                        Завантажити ще
-                    </button>
-                </div>
-            )}
         </div>
     )
 }

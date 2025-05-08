@@ -101,5 +101,6 @@ export const RegisterSchema = z.object({
     }),
     name: z.string().min(1, {
         message: "Name is required",
-    })
+    }),
+    role: z.nativeEnum(UserRole)
 })

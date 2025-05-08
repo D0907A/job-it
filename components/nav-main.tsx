@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {useCurrentRole} from "@/hooks/use-current-role";
 
 export function NavMain({
                           items,
@@ -24,27 +25,34 @@ export function NavMain({
 }) {
   const pathname = usePathname()
 
+  const userRole = useCurrentRole();
+  console.log(userRole)
+
   return (
       <SidebarGroup>
         <SidebarGroupContent className="flex flex-col gap-2">
           {/* Quick Create + Inbox */}
           <SidebarMenu>
             <SidebarMenuItem className="flex items-center gap-2">
-              <SidebarMenuButton
+              {userRole!='USER' && (
+                <SidebarMenuButton
                   tooltip="Quick Create"
                   className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 active:bg-primary/90"
               >
-                <PlusCircleIcon className="h-4 w-4" />
-                <span>Quick Create</span>
-              </SidebarMenuButton>
-              <Button
-                  size="icon"
-                  className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"
-                  variant="outline"
-              >
-                <MailIcon className="h-4 w-4" />
-                <span className="sr-only">Inbox</span>
-              </Button>
+                <PlusCircleIcon className="h-4 w-4"/>
+                  <Link href={"/panel/jobs/new"}>
+                    <span>Quick Create</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
+              {/*<Button*/}
+              {/*    size="icon"*/}
+              {/*    className="h-9 w-9 shrink-0 group-data-[collapsible=icon]:opacity-0"*/}
+              {/*    variant="outline"*/}
+              {/*>*/}
+              {/*  <MailIcon className="h-4 w-4" />*/}
+              {/*  <span className="sr-only">Inbox</span>*/}
+              {/*</Button>*/}
             </SidebarMenuItem>
           </SidebarMenu>
 

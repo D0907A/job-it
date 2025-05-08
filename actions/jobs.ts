@@ -39,7 +39,6 @@ export async function getAllPublicJobs(offset = 0, limit = 5, filters: Record<st
         for (const [key, values] of Object.entries(filters)) {
             if (Array.isArray(values) && values.length > 0) {
                 if (key === 'title') {
-                    // пошук по частковому входженню в назву (case-insensitive)
                     whereClause['title'] = {
                         contains: values[0],
                         mode: 'insensitive',
@@ -66,6 +65,65 @@ export async function getAllPublicJobs(offset = 0, limit = 5, filters: Record<st
     }
 }
 
+
+export async function getJobs(offset = 0, limit = 5, filters = {}) {
+    const where = {};
+
+
+
+    if (filters.title) {
+        where.title = {
+            contains: filters.title,
+            mode: "insensitive",
+        };
+    }
+
+    if (filters.jobType?.length) {
+        where.jobType = {
+            in: filters.jobType,
+        };
+    }
+
+    if (filters.employmentType?.length) {
+        where.employmentType = {
+            in: filters.employmentType,
+        };
+    }
+
+    if (filters.workingType?.length) {
+        where.workingType = {
+            in: filters.workingType,
+        };
+    }
+
+    if (filters.experienceLevel?.length) {
+        where.experienceLevel = {
+            in: filters.experienceLevel,
+        };
+    }
+
+    if (filters.skill?.length) {
+        where.jobSkills = {
+            some: {
+                skill: {
+                    in: filters.skill,
+                },
+            },
+        };
+    }
+
+    const jobs = await db.jobVacancy.findMany({
+        where,
+        include: {
+            company: true,
+            jobSkills: true,
+        },
+        skip: offset,
+        take: limit,
+    });
+
+    return jobs;
+}
 
 
 export async function createJob(formData: FormData) {

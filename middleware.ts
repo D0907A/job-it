@@ -7,10 +7,11 @@ const auth = NextAuth(authConfig).auth;
 export default auth((req) => {
     const { nextUrl } = req;
     const isLoggedIn = !!req.auth;
-
     const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
-    const isEdgeStoreRoute = nextUrl.pathname.startsWith("/api/edgestore"); // ✅ allow upload API
-    const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+    const isEdgeStoreRoute = nextUrl.pathname.startsWith("/api/edgestore");
+    const isPublicRoute = publicRoutes.some(prefix =>
+        nextUrl.pathname.startsWith(prefix)
+    );
     const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
     if (isApiAuthRoute || isEdgeStoreRoute) {
@@ -30,6 +31,8 @@ export default auth((req) => {
 
     return null;
 });
+
+
 
 // Optionally, don't invoke Middleware on some paths
 export const config = {

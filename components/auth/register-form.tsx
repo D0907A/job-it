@@ -21,6 +21,7 @@ import { login } from "@/actions/login";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/ui/form-success";
 import {register} from "@/actions/register";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const RegisterForm = () => {
     const [isPending, startTransition] = useTransition();
@@ -34,6 +35,7 @@ export const RegisterForm = () => {
             name: "",
             email: "",
             password: "",
+            role: "USER",
         },
     });
 
@@ -99,6 +101,35 @@ export const RegisterForm = () => {
                                             type="password"
                                         />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="role"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Role</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        disabled={isPending}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a role" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="USER">User</SelectItem>
+                                            <SelectItem value="RECRUITER">Recruiter</SelectItem>
+                                            <SelectItem value="EMPLOYER">Employer</SelectItem>
+                                            <SelectItem value="APLICANT">Applicant</SelectItem>
+                                            {/* Remove ADMIN from here if you don't want users to pick it manually */}
+                                            {/* <SelectItem value="ADMIN">Admin</SelectItem> */}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

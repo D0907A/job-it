@@ -13,6 +13,9 @@ generator client {
 enum UserRole {
   ADMIN
   USER
+  RECRUITER
+  EMPLOYER
+  APPLICANT
 }
 
 enum JobType {
